@@ -1,0 +1,19 @@
+{
+    "emailTo": "guptasa@microsoft.com, abc@gmail.com",
+    "deployment_validation": {
+        "log_order": [
+            {
+                "rules": [
+                    "ID: 123, Service: 100, Service Init",
+                    "ID: 123, Service: 100, Service Started Success"
+                ]
+            },
+            {
+                "rules": [
+                    "ID: 123, Service: 101, Service Init",
+                    "ID: 123, Service: 101, Service Started Success"
+                ]
+            }
+        ]
+    }
+}
