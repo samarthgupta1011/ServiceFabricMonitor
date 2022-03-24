@@ -1,8 +1,8 @@
 param (
     [Parameter()]
     $SubscriptionId,
-    [Parameter()]
-    $ResourceGroupName,
+    [Parameter(Mandatory=$true)]
+    [String]$ResourceGroupName,
     [Parameter()]
     $ApplicationInsightsName,
     [Parameter()]
@@ -10,9 +10,15 @@ param (
     [Parameter()]
     $AlertLocation,
     [Parameter()]
-    $DeployVersion
+    $DeployVersion,
+    [Parameter(Mandatory=$false)]
+    [switch]$SkipActionGroupCreation,
+    [Parameter(Mandatory=$false)]
+    [String[]]$EmailList
 )
 
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
 
 # Read Rules.json
     # Read emails - generate object for emailReceivers (array) in ActionGroups
@@ -31,10 +37,57 @@ param (
         # Call ARM_ALERT (autogenerate required names and pass required params)
 
 
+function LoginToSubscription
+{
+    $connencted = $false
+    try {
+        if ($null -ne (Get-AzSubscription)) {
+            $connencted = $true
+        }
+    }
+    catch
+    {
+    }
+
+    if (!$connencted) {
+        Connect-AzAccount
+    }
+}
+
+function CreateActionGroup 
+{
+    Write-Host "Creating action group"
+    if (($null -eq $EmailList) -or ($EmailList.Count -eq 0))
+    {
+        Write-Error "Kindly Specify EmailList for creation of Action Group"
+    }
+    [hashtable[]]$emailReceivers = @()
+    foreach ($emailAddr in $EmailList)
+    {
+        Write-Host "Adding $emailAddr to the action group"
+        [hashtable]$singleEmailProp = @{
+            name = $emailAddr
+            emailAddress = $emailAddr
+            useCommonAlertSchema = $true
+        }
+        $emailReceivers += $singleEmailProp
+    }
+    new-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateFile .\ActionGroup\ActionGroup.Template.json -TemplateParameterObject @{actionGroupName='AutoActionGroup'; actionGroupShortName='autoact'; emailReceivers=$emailReceivers;}
+    Write-Host "Action group created successfully"
+}
 
 
+function main
+{
+    LoginToSubscription
 
+    if ($SkipActionGroupCreation -eq $false)
+    {
+        CreateActionGroup
+    }
+}
 
+main
 
 
 
