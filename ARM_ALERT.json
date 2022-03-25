@@ -114,7 +114,7 @@
         },
         "windowSize": {
             "type": "string",
-            "defaultValue": "PT10M",
+            "defaultValue": "PT15M",
             "allowedValues": [
                 "PT1M",
                 "PT5M",
@@ -157,8 +157,7 @@
                 "description": "[parameters('alertDescription')]",
                 "severity": "[parameters('alertSeverity')]",
                 "enabled": "[parameters('isEnabled')]",
-                "scopes": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupName'), '/providers/microsoft.insights/components/', parameters('applicationInsightsName'))]",
-                //"scopes": ["/subscriptions/e7f8f258-31f1-4844-b444-c344f44487cc/resourceGroups/SFAppv1/providers/microsoft.insights/components/VotingAppInsights"],
+                "scopes": ["[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupName'), '/providers/microsoft.insights/components/', parameters('applicationInsightsName'))]"],
                 "evaluationFrequency":"[parameters('evaluationFrequency')]",
                 "windowSize": "[parameters('windowSize')]",
                 "criteria": {
@@ -168,17 +167,17 @@
                             "dimensions":[],
                             "operator": "[parameters('operator')]",
                             "threshold" : "[parameters('threshold')]",
-                            "timeAggregation": "[parameters('timeAggregation')]",
-                            "failingPeriods": {
-                                "numberOfEvaluationPeriods": "[parameters('numberOfEvaluationPeriods')]",
-                                "minFailingPeriodsToAlert": "[parameters('minFailingPeriodsToAlert')]"
-                            }
+                            "timeAggregation": "[parameters('timeAggregation')]"
+                            /*
+                            // "failingPeriods": {
+                            //     "numberOfEvaluationPeriods": "[parameters('numberOfEvaluationPeriods')]",
+                            //     "minFailingPeriodsToAlert": "[parameters('minFailingPeriodsToAlert')]"
+                            // }*/
                         }
                     ]
                 },
                 "actions": {
-                    "actionGroups": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupName'), '/providers/Microsoft.Insights/actionGroups/', parameters('actionGroupName'))]",
-                    //"actionGroups": ["/subscriptions/e7f8f258-31f1-4844-b444-c344f44487cc/resourceGroups/SFAppv1/providers/Microsoft.Insights/actionGroups/SendEmailToAll"]
+                    "actionGroups": ["[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourceGroupName'), '/providers/Microsoft.Insights/actionGroups/', parameters('actionGroupName'))]"]
                 }
             }
         }

@@ -1,5 +1,5 @@
 param (
-    [Parameter()]
+    [Parameter(Mandatory=$true)]
     $SubscriptionId,
     [Parameter(Mandatory=$true)]
     [String]$ResourceGroupName,
@@ -14,28 +14,13 @@ param (
     [Parameter(Mandatory=$false)]
     [switch]$SkipActionGroupCreation,
     [Parameter(Mandatory=$false)]
-    [String[]]$EmailList
+    [String[]]$EmailList,
+    [Parameter(Mandatory=$false)]
+    [switch]$SkipAlertCreation
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
-
-# Read Rules.json
-    # Read emails - generate object for emailReceivers (array) in ActionGroups
-                # Eg. $jsonRequest = @(
-                #      @{
-                #             name = 'abc'
-                #             emailAddress = 'xyz@gmail.com'
-                #             useCommonAlertSchema = $true
-                #         }
-                #     ) 
-        # Create action group using ARM_ACTION (autogenerate required names)
-                    # Example call to ARM Templates
-                    # new-AzResourceGroupDeployment -TemplateFile .\ARM_ACTION_GRP.json -TemplateParameterObject @{actionGroupName='testArm'; actionGroupShortName='abc12311'; emailReceivers=$jsonRequest;}
-    # For each rules object
-        # Create query for ARM_ALERT (make required changes in the ARM template)
-        # Call ARM_ALERT (autogenerate required names and pass required params)
-
 
 function LoginToSubscription
 {
@@ -76,14 +61,55 @@ function CreateActionGroup
     Write-Host "Action group created successfully"
 }
 
+function CreateAlert
+{
+    Write-Host "Creating  alert"
+    $alertName = "AutomatedAlert"
+    $alertDescription = "Automated alert created from script"
+    $alertSeverity = 3
+    $isEnabled = $true
+    $applicationInsightsName = "VotingAppInsights"
+    $query = 'customEvents
+    | where customDimensions["Version"] == (tostring(toscalar(customEvents
+        | where customDimensions  has "version"
+        | top 1 by timestamp
+        | project customDimensions["Version"])))'
+    $operator = "LessThan"
+    $threshold = "200"
+    $timeAggregation = "Count"
+    $actionGroupName = "AutoActionGroup"
+
+    new-AzResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateFile .\ARM_ALERT.json `
+        -TemplateParameterObject @{
+            alertName=$alertName
+            location="CentralIndia"
+            alertDescription=$alertDescription
+            isEnabled=$isEnabled
+            alertSeverity=$alertSeverity
+            subscriptionId=$SubscriptionId
+            resourceGroupName=$ResourceGroupName
+            applicationInsightsName=$applicationInsightsName
+            query=$query
+            operator=$operator
+            threshold=$threshold
+            timeAggregation=$timeAggregation
+            actionGroupName=$actionGroupName
+        }
+}
 
 function main
 {
     LoginToSubscription
 
-    if ($SkipActionGroupCreation -eq $false)
+    Write-Host "$SkipActionGroupCreation"
+    if (!$SkipActionGroupCreation)
     {
+        Write-Host $"$SkipActionGroup, " + (!$SkipActionGroup).ToString()
         CreateActionGroup
+    }
+    if (!$SkipAlertCreation)
+    {
+        CreateAlert    
     }
 }
 
