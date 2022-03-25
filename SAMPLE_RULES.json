@@ -1,18 +1,30 @@
 {
-    "emailTo": "guptasa@microsoft.com, abc@gmail.com",
+    "ApplicationName": "VotingApp",
+    "emailTo": "guptasa@microsoft.com, sbhatnagar@microsoft.com, preethamk@microsoft.com",
     "deployment_validation": {
-        "log_order": [
+        "log_format": [
             {
-                "rules": [
-                    "ID: 123, Service: 100, Service Init",
-                    "ID: 123, Service: 100, Service Started Success"
-                ]
+                "rules": {
+                    "Version": "1.0.0",
+                    "ServiceID": "100",
+                    "LogMessages": [
+                        "Service Init",
+                        "Reading service configuration",
+                        "Service configuration read successfully",
+                        "Webserver has started at port 8080",
+                        "Service started successfully"
+                    ]
+                }
             },
             {
-                "rules": [
-                    "ID: 123, Service: 101, Service Init",
-                    "ID: 123, Service: 101, Service Started Success"
-                ]
+                "rules": {
+                    "Version": "1.0.0",
+                    "ServiceID": "101",
+                    "LogMessages": [
+                        "Service Init",
+                        "Service started successfully"
+                    ]
+                }
             }
         ]
     }
